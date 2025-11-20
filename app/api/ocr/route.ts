@@ -19,7 +19,7 @@ export interface OCREntity {
   text: string
   page: number
   confidence: number
-  mentionText?: string
+  mentionText?: string | null
 }
 
 export interface OCRPageResult {
