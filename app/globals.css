@@ -1,0 +1,167 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* LawScanner Color Palette CSS Variables */
+  --color-floral-white: #fffcf2;
+  --color-silver: #ccc5b9;
+  --color-charcoal-brown: #403d39;
+  --color-carbon-black: #252422;
+  --color-spicy-paprika: #eb5e28;
+
+  /* Semantic Colors */
+  --color-primary: var(--color-spicy-paprika);
+  --color-background: var(--color-floral-white);
+  --color-surface: var(--color-silver);
+  --color-text-primary: var(--color-carbon-black);
+  --color-text-secondary: var(--color-charcoal-brown);
+  --color-border: var(--color-silver);
+
+  /* Status Colors */
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-text-primary antialiased;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold text-carbon-black;
+  }
+
+  a {
+    @apply text-primary hover:text-primary-hover transition-colors;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary text-white hover:bg-primary-hover focus:ring-primary;
+  }
+
+  .btn-secondary {
+    @apply btn bg-charcoal-brown text-white hover:bg-carbon-black focus:ring-charcoal-brown;
+  }
+
+  .btn-outline {
+    @apply btn border-2 border-charcoal-brown text-charcoal-brown hover:bg-charcoal-brown hover:text-white focus:ring-charcoal-brown;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-card p-6 border border-silver/30 transition-shadow hover:shadow-card-hover;
+  }
+
+  .input {
+    @apply w-full px-4 py-2 rounded-lg border border-silver bg-white text-text-primary placeholder:text-charcoal-brown/50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-charcoal-brown mb-1;
+  }
+
+  /* Redaction styles */
+  .redacted {
+    @apply bg-carbon-black text-carbon-black select-none cursor-pointer;
+  }
+
+  .redacted-preview {
+    @apply bg-carbon-black/90;
+  }
+
+  /* Scanner overlay */
+  .scanner-overlay {
+    @apply fixed inset-0 bg-carbon-black/80 backdrop-blur-sm z-50 flex items-center justify-center;
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    @apply h-2 bg-silver rounded-full overflow-hidden;
+  }
+
+  .progress-bar-fill {
+    @apply h-full bg-primary transition-all duration-300 ease-out;
+  }
+
+  /* Confidence indicator */
+  .confidence-high {
+    @apply text-green-600 bg-green-100;
+  }
+
+  .confidence-medium {
+    @apply text-yellow-600 bg-yellow-100;
+  }
+
+  .confidence-low {
+    @apply text-red-600 bg-red-100;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Scanbot SDK custom styles */
+.scanbot-container {
+  @apply w-full h-full min-h-[400px] rounded-lg overflow-hidden bg-carbon-black;
+}
+
+.scanbot-camera-view {
+  @apply w-full h-full;
+}
+
+/* Document viewer styles */
+.document-viewer {
+  @apply relative bg-white rounded-lg overflow-hidden;
+}
+
+.document-page {
+  @apply relative w-full;
+}
+
+.text-block {
+  @apply absolute cursor-pointer hover:bg-primary/10 transition-colors;
+}
+
+.text-block.selected {
+  @apply bg-primary/20 ring-2 ring-primary;
+}
