@@ -157,14 +157,16 @@ async function processWithGoogleDocumentAI(
     // Extract text blocks
     if (page?.blocks) {
       for (const block of page.blocks) {
+        if (!block.layout) continue
+
         const blockText = extractTextFromLayout(block.layout, document.text || '')
-        const confidence = block.layout?.confidence || 0
+        const confidence = block.layout.confidence || 0
 
         blocks.push({
           id: `block-${i}-${blocks.length}`,
           text: blockText,
           confidence,
-          boundingBox: extractBoundingBox(block.layout?.boundingPoly),
+          boundingBox: extractBoundingBox(block.layout.boundingPoly),
           blockType: 'PARAGRAPH',
         })
 
@@ -177,14 +179,16 @@ async function processWithGoogleDocumentAI(
     // Extract lines if no blocks
     if (blocks.length === 0 && page?.lines) {
       for (const line of page.lines) {
+        if (!line.layout) continue
+
         const lineText = extractTextFromLayout(line.layout, document.text || '')
-        const confidence = line.layout?.confidence || 0
+        const confidence = line.layout.confidence || 0
 
         blocks.push({
           id: `line-${i}-${blocks.length}`,
           text: lineText,
           confidence,
-          boundingBox: extractBoundingBox(line.layout?.boundingPoly),
+          boundingBox: extractBoundingBox(line.layout.boundingPoly),
           blockType: 'LINE',
         })
 
