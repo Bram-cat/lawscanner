@@ -353,7 +353,7 @@ async function processWithAWSTextract(
 
 // Helper functions for Google Document AI
 function extractTextFromLayout(
-  layout: { textAnchor?: { textSegments?: Array<{ startIndex?: string | number; endIndex?: string | number }> } } | undefined,
+  layout: any,
   fullText: string
 ): string {
   if (!layout?.textAnchor?.textSegments) return ''
@@ -368,7 +368,7 @@ function extractTextFromLayout(
 }
 
 function extractBoundingBox(
-  boundingPoly: { normalizedVertices?: Array<{ x?: number; y?: number }> } | undefined
+  boundingPoly: any
 ): { x: number; y: number; width: number; height: number } {
   if (!boundingPoly?.normalizedVertices || boundingPoly.normalizedVertices.length < 4) {
     return { x: 0, y: 0, width: 0, height: 0 }
