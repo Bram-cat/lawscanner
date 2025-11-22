@@ -112,17 +112,20 @@ async function processWithGoogleDocumentAI(
   )
 
   // Initialize the client
-  // TODO: Configure your Google Cloud project settings
   const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID || 'your-project-id'
-  const location = process.env.GOOGLE_CLOUD_LOCATION || 'us' // or 'eu'
+  const location = process.env.GOOGLE_CLOUD_LOCATION || 'us'
   const processorId = process.env.GOOGLE_DOCUMENT_AI_PROCESSOR_ID || 'your-processor-id'
 
+  // Use environment variables for credentials (works in Vercel)
+  const credentials = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL && process.env.GOOGLE_PRIVATE_KEY
+    ? {
+        client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+        private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+      }
+    : undefined
+
   const client = new DocumentProcessorServiceClient({
-    // TODO: Uncomment and add your credentials if not using GOOGLE_APPLICATION_CREDENTIALS
-    // credentials: {
-    //   client_email: process.env.GOOGLE_CLIENT_EMAIL,
-    //   private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    // },
+    credentials,
   })
 
   const name = `projects/${projectId}/locations/${location}/processors/${processorId}`
