@@ -85,10 +85,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result)
   } catch (error) {
     console.error('OCR processing error:', error)
+
+    // Log full error details for debugging
+    if (error instanceof Error) {
+      console.error('Error message:', error.message)
+      console.error('Error stack:', error.stack)
+    }
+
     return NextResponse.json(
       {
         error: 'OCR processing failed',
         details: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
       },
       { status: 500 }
     )
