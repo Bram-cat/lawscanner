@@ -33,8 +33,15 @@ export interface SuggestedRedaction {
   reason: string
 }
 
+export interface KeyHighlight {
+  topic: string
+  summary: string
+}
+
 export interface SummaryResult {
   short_summary: string
+  key_highlights: KeyHighlight[]
+  detailed_summary: string
   parties: Party[]
   important_dates: ImportantDate[]
   obligations: Obligation[]
@@ -55,6 +62,11 @@ Input Format: JSON with {meta: {filename, pages}, ocr: [{page, text, blocks: [..
 
 Output Format: JSON with {
   short_summary: "A single clear sentence (10-20 words) explaining what this document is about in plain business language",
+  key_highlights: [{
+    topic: "Brief topic name (2-4 words)",
+    summary: "One-line explanation of this aspect"
+  }],
+  detailed_summary: "2-3 paragraph comprehensive summary covering all important aspects of the document. Focus on what matters to business owners: rights, obligations, costs, risks, and key terms. Use plain English.",
   parties: [{role, name, excerpt}],
   important_dates: [{type, date, excerpt}],
   obligations: [{who, action, excerpt}],
@@ -68,21 +80,46 @@ Output Format: JSON with {
 
 Guidelines:
 1. **short_summary**: Write ONE clear sentence that any businessperson can understand. Focus on: What IS this document? Use plain English, avoid legal jargon.
-2. **parties**: List ALL parties involved with clear roles (e.g., "Service Provider", "Client", "Guarantor", "Witness")
-3. **important_dates**: Extract key dates like effective date, expiration, payment deadlines, milestones
-4. **obligations**: What each party must DO. Be specific and actionable.
-5. **payment_terms**: Extract payment amounts, schedules, and conditions
-6. **termination_clauses**: How can this agreement be ended?
-7. **governing_law**: Which state/country law applies?
-8. **risk_flags**: Identify potential concerns (score 1-10, where 1=minimal risk, 10=critical risk)
-   - Look for: unusual clauses, missing protections, one-sided terms, ambiguous language
-9. **suggested_redactions**: Flag sensitive info (SSN, bank accounts, addresses, phone numbers)
-10. **confidence_score**: Your confidence in the analysis (0-1)
+
+2. **key_highlights**: Extract 3-8 key subtopics with one-line summaries. Examples:
+   - {topic: "Data Collection", summary: "Google collects browsing history, location data, and search queries"}
+   - {topic: "User Rights", summary: "Users can access, download, and delete their personal data"}
+   - {topic: "Third-Party Sharing", summary: "Data may be shared with advertisers and service providers"}
+
+3. **detailed_summary**: Write 2-3 paragraphs that comprehensively explain the document. Cover:
+   - What the document is and its purpose
+   - Key rights and obligations for all parties
+   - Important terms, conditions, and limitations
+   - Financial implications (if any)
+   - Notable risks or red flags
+   Use plain, conversational English as if explaining to a friend.
+
+4. **parties**: List ALL parties involved with clear roles (e.g., "Service Provider", "Client", "Data Controller")
+
+5. **important_dates**: Extract key dates like effective date, expiration, deadlines, renewal dates
+
+6. **obligations**: What each party must DO. Be specific and actionable.
+
+7. **payment_terms**: Extract payment amounts, schedules, and conditions (if applicable)
+
+8. **termination_clauses**: How can this agreement be ended? (if applicable)
+
+9. **governing_law**: Which state/country law applies? (if specified)
+
+10. **risk_flags**: Identify potential concerns (score 1-10, where 1=minimal risk, 10=critical risk)
+    - Look for: unusual clauses, missing protections, one-sided terms, ambiguous language, privacy concerns
+
+11. **suggested_redactions**: Flag sensitive info (SSN, bank accounts, addresses, phone numbers, credit cards)
+    IMPORTANT: DO NOT include actual sensitive data in your response - only flag WHERE it appears
+
+12. **confidence_score**: Your confidence in the analysis (0-1)
 
 Special Rules:
-- If you can't determine something with confidence, use null or "UNKNOWN" with LOW confidence score
+- NEVER include actual sensitive data (addresses, phone numbers, account numbers, SSN, credit cards) in your summary
+- If you can't determine something with confidence, use null or "Not specified in document"
 - Use clear, simple business language - imagine explaining to someone without legal training
 - Be precise and factual - NO legal advice language (avoid "you should", "you must")
+- Focus on what the document SAYS, not what people should DO about it
 - Always return valid JSON only, no markdown, no additional text
 
 Response MUST be valid JSON only.`
@@ -189,6 +226,8 @@ export async function POST(request: NextRequest) {
 function validateAndNormalizeSummary(summary: Partial<SummaryResult>): SummaryResult {
   return {
     short_summary: summary.short_summary || 'Unable to generate summary - document analysis incomplete',
+    key_highlights: Array.isArray(summary.key_highlights) ? summary.key_highlights : [],
+    detailed_summary: summary.detailed_summary || 'No detailed summary available.',
     parties: Array.isArray(summary.parties) ? summary.parties : [],
     important_dates: Array.isArray(summary.important_dates) ? summary.important_dates : [],
     obligations: Array.isArray(summary.obligations) ? summary.obligations : [],
@@ -209,6 +248,25 @@ function validateAndNormalizeSummary(summary: Partial<SummaryResult>): SummaryRe
 function getMockSummary(): SummaryResult {
   return {
     short_summary: 'This is a service agreement between two companies establishing terms for consulting services.',
+    key_highlights: [
+      {
+        topic: 'Service Scope',
+        summary: 'Consulting services to be provided monthly as detailed in Exhibit A'
+      },
+      {
+        topic: 'Payment Terms',
+        summary: 'Net 30 payment terms with 1.5% monthly interest on late payments'
+      },
+      {
+        topic: 'Contract Duration',
+        summary: 'One-year initial term from January 15, 2024 to January 15, 2025'
+      },
+      {
+        topic: 'Termination Rights',
+        summary: 'Either party can terminate with 30 days notice or immediately for breach'
+      }
+    ],
+    detailed_summary: 'This service agreement establishes a consulting relationship between Example Consulting LLC (Service Provider) and Business Corp (Client). The agreement runs for one year from January 15, 2024 to January 15, 2025. The Service Provider will deliver monthly consulting services as outlined in Exhibit A, while the Client is obligated to pay all invoices within 30 days of receipt.\n\nPayment terms include monthly invoicing with Net 30 terms, and late payments will incur a 1.5% monthly interest charge. Either party may terminate the agreement with 30 days written notice, or immediately in cases of material breach. The agreement is governed by Delaware state law.\n\nKey risks include a broad indemnification clause that may expose the client to significant liability (risk score: 4/10), though this is partially balanced by standard limitation of liability provisions that protect the service provider (risk score: 2/10).',
     parties: [
       {
         role: 'Service Provider',

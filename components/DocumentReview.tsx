@@ -92,6 +92,48 @@ export default function DocumentReview({
         </div>
       </div>
 
+      {/* Key Highlights */}
+      {summaryResult.key_highlights && summaryResult.key_highlights.length > 0 && (
+        <div className="space-y-4">
+          <h3 className="text-xl font-semibold text-carbon-black">
+            Key Highlights
+          </h3>
+          <div className="grid gap-4 md:grid-cols-2">
+            {summaryResult.key_highlights.map((highlight, idx) => (
+              <div
+                key={idx}
+                className="p-4 bg-floral-white border border-silver/30 rounded-xl hover:border-primary/30 transition-colors"
+              >
+                <h4 className="font-semibold text-carbon-black mb-1">
+                  {highlight.topic}
+                </h4>
+                <p className="text-sm text-charcoal-brown">
+                  {highlight.summary}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Detailed Summary */}
+      {summaryResult.detailed_summary && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Document Summary</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="prose prose-sm max-w-none">
+              {summaryResult.detailed_summary.split('\n\n').map((paragraph, idx) => (
+                <p key={idx} className="text-charcoal-brown mb-4 last:mb-0">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Detailed Analysis - Scrollable Content */}
       <div className="space-y-6">
         <h3 className="text-xl font-semibold text-carbon-black">
