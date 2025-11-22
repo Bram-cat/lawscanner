@@ -121,13 +121,12 @@ export async function POST(request: NextRequest) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    // Use gemini-1.5-pro for best performance with billing enabled
-    // Note: Without v1/ prefix for SDK compatibility
+    // Use gemini-2.0-flash-exp for best performance (latest model as of Dec 2024)
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-pro",
+      model: "gemini-2.0-flash-exp",
       generationConfig: {
         temperature: 0.2,
-        topP: 0.8,
+        topP: 0.95,
         topK: 40,
         maxOutputTokens: 8192, // Increased for better legal analysis
       },
