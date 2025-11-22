@@ -112,17 +112,24 @@ async function processWithGoogleDocumentAI(
   )
 
   // Initialize the client
-  const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID || 'your-project-id'
-  const location = process.env.GOOGLE_CLOUD_LOCATION || 'us'
-  const processorId = process.env.GOOGLE_DOCUMENT_AI_PROCESSOR_ID || 'your-processor-id'
+  const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID
+  const location = process.env.GOOGLE_CLOUD_LOCATION
+  const processorId = process.env.GOOGLE_DOCUMENT_AI_PROCESSOR_ID
+
+  // Validate all required environment variables
+  if (!projectId || !location || !processorId) {
+    throw new Error('Missing Google Cloud configuration. Please set GOOGLE_CLOUD_PROJECT_ID, GOOGLE_CLOUD_LOCATION, and GOOGLE_DOCUMENT_AI_PROCESSOR_ID in your environment variables.')
+  }
 
   // Use environment variables for credentials (works in Vercel)
-  const credentials = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL && process.env.GOOGLE_PRIVATE_KEY
-    ? {
-        client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-        private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-      }
-    : undefined
+  if (!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !process.env.GOOGLE_PRIVATE_KEY) {
+    throw new Error('Missing Google Cloud credentials. Please set GOOGLE_SERVICE_ACCOUNT_EMAIL and GOOGLE_PRIVATE_KEY in your environment variables.')
+  }
+
+  const credentials = {
+    client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+    private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+  }
 
   const client = new DocumentProcessorServiceClient({
     credentials,
